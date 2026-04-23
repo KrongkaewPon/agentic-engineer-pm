@@ -1,0 +1,11 @@
+.git
+.cursor
+.pytest_cache
+__pycache__
+*.pyc
+.DS_Store
+.env
+
+frontend/node_modules
+frontend/.next
+frontend/test-results

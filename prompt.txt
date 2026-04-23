@@ -1,0 +1,13 @@
+source: git clone https://github.com/ed-donner/pm.git 
+
+1. please review AGENTS.md and thing plan, and let me knoe if you have any question. Do not do any work yet.
+2. confirm approve to processed to path 2
+3. pls runs tests thoroughly Gring up the server, make sure it works, check the routes, bring it down, let me know when you are confident
+4. plase tell me how i test this path myself
+5. that good path 2 is done. Are all success criteria for path 2 achieved?
+6. approved - move to part 4. By the way, going forwards, please update the plan to only achieve 80% test coverage if it's sensible to do so; avoid adding unnecessary tests just to hit 80%. Focus on valuable tests;: not hitting 80% is ok.
+7. approved moving to part 5.
+8. approved moving to part 6.
+9. processed with part 7.
+10. pls read @backend/AGENTS.md  then read the @docs/PLAN.md  and let me know any questions before we start path 8
+11. pls procssed with part 9

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Management MVP - Part 2</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+        color: #032147;
+      }
+
+      h1 {
+        margin-bottom: 0.5rem;
+      }
+
+      .card {
+        border: 1px solid #209dd7;
+        border-radius: 8px;
+        padding: 1rem;
+        max-width: 640px;
+      }
+
+      code {
+        background: #f5f5f5;
+        border-radius: 4px;
+        padding: 0.2rem 0.4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Hello world</h1>
+    <p>FastAPI + Docker scaffolding is running.</p>
+    <div class="card">
+      <p>API response from <code>/api/hello</code>:</p>
+      <pre id="api-output">Loading...</pre>
+    </div>
+
+    <script>
+      async function loadHello() {
+        try {
+          const response = await fetch("/api/hello");
+          const data = await response.json();
+          document.getElementById("api-output").textContent = JSON.stringify(
+            data,
+            null,
+            2
+          );
+        } catch (error) {
+          document.getElementById("api-output").textContent = String(error);
+        }
+      }
+
+      loadHello();
+    </script>
+  </body>
+</html>
