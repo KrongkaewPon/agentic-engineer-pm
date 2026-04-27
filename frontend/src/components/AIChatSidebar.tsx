@@ -1,8 +1,10 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useState } from "react";
+import type { BoardData } from "@/lib/kanban";
 
 type ChatMessage = {
+  id: string;
   role: "user" | "assistant";
   content: string;
 };
@@ -12,7 +14,10 @@ type ChatResponse = {
   model: string;
   provider: string;
   board_update_applied: boolean;
+  board_update: BoardData | null;
 };
+
+const makeId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
 type AIChatSidebarProps = {
   username: string;
@@ -22,6 +27,7 @@ type AIChatSidebarProps = {
 export const AIChatSidebar = ({ username, onBoardUpdated }: AIChatSidebarProps) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
+      id: makeId(),
       role: "assistant",
       content: "Ask me to summarize or update your board.",
     },
@@ -29,11 +35,6 @@ export const AIChatSidebar = ({ username, onBoardUpdated }: AIChatSidebarProps) 
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
-
-  const history = useMemo(
-    () => messages.map(({ role, content }) => ({ role, content })),
-    [messages]
-  );
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -45,7 +46,7 @@ export const AIChatSidebar = ({ username, onBoardUpdated }: AIChatSidebarProps) 
     setInput("");
     setIsSending(true);
     setStatus("Thinking...");
-    setMessages((prev) => [...prev, { role: "user", content: message }]);
+    setMessages((prev) => [...prev, { id: makeId(), role: "user", content: message }]);
 
     try {
       const response = await fetch("/api/chat", {
@@ -54,7 +55,7 @@ export const AIChatSidebar = ({ username, onBoardUpdated }: AIChatSidebarProps) 
         body: JSON.stringify({
           username,
           message,
-          history,
+          history: messages.map(({ role, content }) => ({ role, content })),
         }),
       });
 
@@ -63,7 +64,7 @@ export const AIChatSidebar = ({ username, onBoardUpdated }: AIChatSidebarProps) 
       }
 
       const body = (await response.json()) as ChatResponse;
-      setMessages((prev) => [...prev, { role: "assistant", content: body.answer }]);
+      setMessages((prev) => [...prev, { id: makeId(), role: "assistant", content: body.answer }]);
       if (body.board_update_applied) {
         setStatus("Board updated");
         onBoardUpdated();
@@ -74,6 +75,7 @@ export const AIChatSidebar = ({ username, onBoardUpdated }: AIChatSidebarProps) 
       setMessages((prev) => [
         ...prev,
         {
+          id: makeId(),
           role: "assistant",
           content: "I could not reach the AI service right now. Please try again.",
         },
@@ -103,9 +105,9 @@ export const AIChatSidebar = ({ username, onBoardUpdated }: AIChatSidebarProps) 
 
       <div className="mt-4 h-[420px] overflow-y-auto rounded-2xl border border-[var(--stroke)] bg-[var(--surface)] p-3">
         <div className="flex flex-col gap-3">
-          {messages.map((message, index) => (
+          {messages.map((message) => (
             <div
-              key={`${message.role}-${index}`}
+              key={message.id}
               className={
                 message.role === "user"
                   ? "self-end rounded-2xl bg-[var(--secondary-purple)] px-3 py-2 text-sm text-white"
@@ -123,6 +125,7 @@ export const AIChatSidebar = ({ username, onBoardUpdated }: AIChatSidebarProps) 
           value={input}
           onChange={(event) => setInput(event.target.value)}
           placeholder="Ask AI to summarize progress or move cards..."
+          maxLength={2000}
           className="h-24 w-full resize-none rounded-2xl border border-[var(--stroke)] px-3 py-2 text-sm outline-none transition focus:border-[var(--primary-blue)]"
         />
         <button

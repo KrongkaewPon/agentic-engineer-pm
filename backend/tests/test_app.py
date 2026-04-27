@@ -155,6 +155,27 @@ def test_chat_success_response_and_board_update(monkeypatch, tmp_path: Path) -> 
     assert board["columns"][0]["title"] == "AI Backlog"
 
 
+def test_chat_malformed_json_response_returns_502(monkeypatch, tmp_path: Path) -> None:
+    use_test_db(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
+
+    class FakeBadJsonResponse:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict:
+            return {
+                "model": "openai/gpt-oss-120b",
+                "choices": [{"message": {"content": "not valid json at all {{{"}}],
+            }
+
+    monkeypatch.setattr("app.httpx.post", lambda *a, **kw: FakeBadJsonResponse())
+
+    response = client.post("/api/chat", json={"username": "user", "message": "2+2"})
+    assert response.status_code == 502
+    assert "valid JSON" in response.json()["detail"]
+
+
 def test_chat_upstream_failure_returns_502(monkeypatch, tmp_path: Path) -> None:
     use_test_db(tmp_path)
     monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
@@ -166,4 +187,4 @@ def test_chat_upstream_failure_returns_502(monkeypatch, tmp_path: Path) -> None:
 
     response = client.post("/api/chat", json={"username": "user", "message": "2+2"})
     assert response.status_code == 502
-    assert "OpenRouter request failed" in response.json()["detail"]
+    assert response.json()["detail"] == "AI service request failed"

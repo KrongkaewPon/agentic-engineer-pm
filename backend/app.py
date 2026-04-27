@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import sqlite3
 from pathlib import Path
@@ -8,10 +9,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+logger = logging.getLogger(__name__)
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
-DEFAULT_DB_PATH = BASE_DIR / "pm.db"
+DEFAULT_DB_PATH = BASE_DIR / "data" / "pm.db"
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_MODEL = "openai/gpt-oss-120b"
 
@@ -21,8 +23,8 @@ app.state.db_path = DEFAULT_DB_PATH
 
 class Card(BaseModel):
     id: str
-    title: str
-    details: str
+    title: str = Field(min_length=1, max_length=200)
+    details: str = Field(max_length=5000)
 
 
 class Column(BaseModel):
@@ -39,7 +41,7 @@ class BoardData(BaseModel):
 class ChatRequest(BaseModel):
     username: str
     message: str
-    history: list[dict[str, str]] = Field(default_factory=list)
+    history: list[dict[str, str]] = Field(default_factory=list, max_length=50)
 
 
 class ChatResponse(BaseModel):
@@ -122,6 +124,11 @@ def ensure_db(connection: sqlite3.Connection) -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT NOT NULL UNIQUE
         )
+        """
+    )
+    connection.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)
         """
     )
     connection.execute(
@@ -291,9 +298,10 @@ def call_openrouter_chat(
         )
         response.raise_for_status()
     except httpx.HTTPError as exc:
+        logger.error("OpenRouter request failed: %s", exc)
         raise HTTPException(
             status_code=502,
-            detail=f"OpenRouter request failed: {exc}",
+            detail="AI service request failed",
         ) from exc
 
     data = response.json()
@@ -323,7 +331,8 @@ def call_openrouter_chat(
     if raw_board_update is not None:
         try:
             board_update = BoardData.model_validate(raw_board_update)
-        except Exception as exc:
+        except (ValueError, TypeError) as exc:
+            logger.error("OpenRouter returned invalid board_update: %s", exc)
             raise HTTPException(
                 status_code=502, detail="OpenRouter returned invalid board_update"
             ) from exc

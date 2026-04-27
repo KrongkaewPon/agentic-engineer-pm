@@ -8,3 +8,14 @@ services:
       - .env
     ports:
       - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - pm_data:/app/backend/data
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+
+volumes:
+  pm_data:

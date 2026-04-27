@@ -23,6 +23,13 @@ RUN uv sync --no-dev
 COPY backend /app/backend
 COPY --from=frontend-builder /app/frontend/out /app/backend/static
 
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+
 EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/hello')" || exit 1
+
+USER appuser
 
 CMD ["uv", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

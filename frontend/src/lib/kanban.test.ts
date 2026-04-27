@@ -22,4 +22,9 @@ describe("moveCard", () => {
     expect(result[0].cardIds).toEqual(["card-2"]);
     expect(result[1].cardIds).toEqual(["card-3", "card-1"]);
   });
+
+  it("returns columns unchanged when active card id is not found", () => {
+    const result = moveCard(baseColumns, "card-999", "card-1");
+    expect(result).toEqual(baseColumns);
+  });
 });

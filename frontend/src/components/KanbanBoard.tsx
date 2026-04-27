@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -13,7 +13,7 @@ import {
 } from "@dnd-kit/core";
 import { KanbanColumn } from "@/components/KanbanColumn";
 import { KanbanCardPreview } from "@/components/KanbanCardPreview";
-import { createId, initialData, moveCard, type BoardData } from "@/lib/kanban";
+import { createId, initialData, moveCard, type BoardData, type Card } from "@/lib/kanban";
 
 type KanbanBoardProps = {
   username?: string;
@@ -38,7 +38,7 @@ export const KanbanBoard = ({ username, reloadSignal = 0 }: KanbanBoardProps) =>
     })
   );
 
-  const cardsById = useMemo(() => board.cards, [board.cards]);
+  const cardsById = board.cards;
 
   useEffect(() => {
     if (!username) {
@@ -134,7 +134,8 @@ export const KanbanBoard = ({ username, reloadSignal = 0 }: KanbanBoardProps) =>
   }, [board, isHydratedFromApi, username]);
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveCardId(event.active.id as string);
+    if (typeof event.active.id !== "string") return;
+    setActiveCardId(event.active.id);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -145,9 +146,15 @@ export const KanbanBoard = ({ username, reloadSignal = 0 }: KanbanBoardProps) =>
       return;
     }
 
+    const activeId = active.id;
+    const overId = over.id;
+    if (typeof activeId !== "string" || typeof overId !== "string") {
+      return;
+    }
+
     setBoard((prev) => ({
       ...prev,
-      columns: moveCard(prev.columns, active.id as string, over.id as string),
+      columns: moveCard(prev.columns, activeId, overId),
     }));
   };
 
@@ -261,7 +268,9 @@ export const KanbanBoard = ({ username, reloadSignal = 0 }: KanbanBoardProps) =>
               <KanbanColumn
                 key={column.id}
                 column={column}
-                cards={column.cardIds.map((cardId) => board.cards[cardId])}
+                cards={column.cardIds
+                  .map((cardId) => board.cards[cardId])
+                  .filter((card): card is Card => card !== undefined)}
                 onRename={handleRenameColumn}
                 onAddCard={handleAddCard}
                 onDeleteCard={handleDeleteCard}
