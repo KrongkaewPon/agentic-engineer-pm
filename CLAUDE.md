@@ -73,3 +73,8 @@ Two-stage build: Node 22 builds the Next.js static export → Python 3.12 runtim
 - One board per user; board stored as a single JSON column (`board_json`) in the `boards` table
 - Backend tests use a temp SQLite DB and mock OpenRouter HTTP calls — keep that pattern for new tests
 - Color palette: yellow `#ecad0a`, blue `#209dd7`, purple `#753991`, navy `#032147`; fonts: Space Grotesk (display), Manrope (body)
+
+
+## DEFAULT PLAN
+
+@docs/PLAND.md

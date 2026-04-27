@@ -120,15 +120,17 @@ export const AuthKanbanApp = () => {
           Log out
         </button>
       </div>
-      <div className="mx-auto grid w-full max-w-[1900px] grid-cols-1 gap-6 px-6 pb-8 lg:grid-cols-[1fr_360px]">
+      <div className="mx-auto grid w-full max-w-[1900px] grid-cols-1 items-start gap-6 px-6 pb-8 lg:grid-cols-[1fr_360px]">
         <KanbanBoard
           username={username || DEMO_USERNAME}
           reloadSignal={boardReloadSignal}
         />
-        <AIChatSidebar
-          username={username || DEMO_USERNAME}
-          onBoardUpdated={handleBoardUpdatedByAI}
-        />
+        <div className="lg:sticky lg:top-6">
+          <AIChatSidebar
+            username={username || DEMO_USERNAME}
+            onBoardUpdated={handleBoardUpdatedByAI}
+          />
+        </div>
       </div>
     </>
   );

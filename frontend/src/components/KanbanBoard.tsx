@@ -263,18 +263,20 @@ export const KanbanBoard = ({ username, reloadSignal = 0 }: KanbanBoardProps) =>
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <section className="grid gap-6 lg:grid-cols-5">
-            {board.columns.map((column) => (
-              <KanbanColumn
-                key={column.id}
-                column={column}
-                cards={column.cardIds
-                  .map((cardId) => board.cards[cardId])
-                  .filter((card): card is Card => card !== undefined)}
-                onRename={handleRenameColumn}
-                onAddCard={handleAddCard}
-                onDeleteCard={handleDeleteCard}
-              />
+          <section className="kanban-scroll flex gap-4 overflow-x-auto pb-4">
+            {board.columns.map((column, index) => (
+              <div key={column.id} className="w-[280px] flex-none">
+                <KanbanColumn
+                  column={column}
+                  colorIndex={index}
+                  cards={column.cardIds
+                    .map((cardId) => board.cards[cardId])
+                    .filter((card): card is Card => card !== undefined)}
+                  onRename={handleRenameColumn}
+                  onAddCard={handleAddCard}
+                  onDeleteCard={handleDeleteCard}
+                />
+              </div>
             ))}
           </section>
           <DragOverlay>

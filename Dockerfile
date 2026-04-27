@@ -23,7 +23,7 @@ RUN uv sync --no-dev
 COPY backend /app/backend
 COPY --from=frontend-builder /app/frontend/out /app/backend/static
 
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+RUN mkdir -p /app/backend/data && useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 
 EXPOSE 8000
 

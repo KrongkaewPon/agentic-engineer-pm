@@ -32,3 +32,17 @@ body {
 .font-display {
   font-family: var(--font-display), "Segoe UI", sans-serif;
 }
+
+.kanban-scroll::-webkit-scrollbar {
+  height: 5px;
+}
+.kanban-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.kanban-scroll::-webkit-scrollbar-thumb {
+  background: rgba(3, 33, 71, 0.12);
+  border-radius: 3px;
+}
+.kanban-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(3, 33, 71, 0.22);
+}
